@@ -17,7 +17,7 @@ package com.activeandroid;
  */
 
 import android.content.Context;
-import android.database.sqlite.SQLiteDatabase;
+import net.sqlcipher.database.SQLiteDatabase;
 
 import com.activeandroid.util.Log;
 
@@ -50,6 +50,32 @@ public final class ActiveAndroid {
 
 	public static void dispose() {
 		Cache.dispose();
+	}
+
+	/**
+	 * Sets the SQLCipher password. This must be called before initialize()
+	 * and cannot be changed afterwards.
+	 *
+	 * If the password is blank or null, or if this is not called, the database
+	 * will not be encrypted.
+	 *
+	 * @param password The database password
+	 */
+	public static void setPassword(String password) {
+		setPassword(password.toCharArray());
+	}
+
+	/**
+	 * Sets the SQLCipher password. This must be called before initialize()
+	 * and cannot be changed afterwards.
+	 *
+	 * If the password is blank or null, or if this is not called, the database
+	 * will not be encrypted.
+	 *
+	 * @param password The database password
+	 */
+	public static void setPassword(char[] password) {
+		Cache.setPassword(password);
 	}
 
 	public static void setLoggingEnabled(boolean enabled) {

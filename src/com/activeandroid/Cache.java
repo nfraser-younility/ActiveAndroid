@@ -16,10 +16,11 @@ package com.activeandroid;
  * limitations under the License.
  */
 
+import java.util.Arrays;
 import java.util.Collection;
 
 import android.content.Context;
-import android.database.sqlite.SQLiteDatabase;
+import net.sqlcipher.database.SQLiteDatabase;
 import android.support.v4.util.LruCache;
 
 import com.activeandroid.serializer.TypeSerializer;
@@ -44,6 +45,9 @@ public final class Cache {
 	private static LruCache<String, Model> sEntities;
 
 	private static boolean sIsInitialized = false;
+	private static boolean sSQLLibsLoaded = false;
+
+	private static char[] password = null;
 
 	//////////////////////////////////////////////////////////////////////////////////////
 	// CONSTRUCTORS
@@ -56,10 +60,22 @@ public final class Cache {
 	// PUBLIC METHODS
 	//////////////////////////////////////////////////////////////////////////////////////
 
+	public static synchronized void setPassword(char[] password) {
+		if (Cache.isInitialized())
+			throw new RuntimeException(); // Cannot change password when cache is already initialized
+		Cache.password = Arrays.copyOf(password, password.length);
+	}
+
 	public static synchronized void initialize(Configuration configuration) {
 		if (sIsInitialized) {
 			Log.v("ActiveAndroid already initialized.");
 			return;
+		}
+
+		// Native libraries should be loaded only once, the first time we initialize
+		if (!sSQLLibsLoaded) {
+			sSQLLibsLoaded = true;
+			SQLiteDatabase.loadLibs(configuration.getContext());
 		}
 
 		sContext = configuration.getContext();
@@ -103,7 +119,9 @@ public final class Cache {
 	}
 
 	public static synchronized SQLiteDatabase openDatabase() {
-		return sDatabaseHelper.getWritableDatabase();
+		if (password == null)
+			password = "".toCharArray();
+		return sDatabaseHelper.getWritableDatabase(password);
 	}
 
 	public static synchronized void closeDatabase() {

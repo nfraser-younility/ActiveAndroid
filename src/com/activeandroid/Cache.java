@@ -70,7 +70,8 @@ public final class Cache {
 		// actually used, however at this point it seems like the reflection
 		// required would be too costly to be of any benefit. We'll just set a max
 		// object size instead.
-		sEntities = new LruCache<String, Model>(configuration.getCacheSize());
+		if (configuration.getCacheSize() != 0)
+			sEntities = new LruCache<String, Model>(configuration.getCacheSize());
 
 		openDatabase();
 
@@ -80,8 +81,10 @@ public final class Cache {
 	}
 
 	public static synchronized void clear() {
-		sEntities.evictAll();
-		Log.v("Cache cleared.");
+		if (sEntities != null) {
+			sEntities.evictAll();
+			Log.v("Cache cleared.");
+		}
 	}
 
 	public static synchronized void dispose() {
@@ -127,15 +130,19 @@ public final class Cache {
 	}
 
 	public static synchronized void addEntity(Model entity) {
-		sEntities.put(getIdentifier(entity), entity);
+		if (sEntities != null)
+			sEntities.put(getIdentifier(entity), entity);
 	}
 
 	public static synchronized Model getEntity(Class<? extends Model> type, long id) {
-		return sEntities.get(getIdentifier(type, id));
+		if (sEntities != null)
+			return sEntities.get(getIdentifier(type, id));
+		return null;
 	}
 
 	public static synchronized void removeEntity(Model entity) {
-		sEntities.remove(getIdentifier(entity));
+		if (sEntities != null)
+			sEntities.remove(getIdentifier(entity));
 	}
 
 	// Model cache

@@ -132,6 +132,11 @@ public class Configuration {
 		// PUBLIC METHODS
 		//////////////////////////////////////////////////////////////////////////////////////
 
+		/**
+		 * Sets the number of entities to hold in the cache.
+		 *
+		 * Pass 0 to disable the cache.
+		 */
 		public Builder setCacheSize(int cacheSize) {
 			mCacheSize = cacheSize;
 			return this;
